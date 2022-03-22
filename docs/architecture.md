@@ -7,6 +7,8 @@ This page documents the system and software architecture of Infra. It follows th
 
 ## System Context
 
+The system context shows how users, Infra, and external systems interact.
+
 ```mermaid
 flowchart TD
 
@@ -35,6 +37,99 @@ flowchart TD
 ```
 
 
-## Containers
+## Infra Containers
+
+The Infra system is comprised of 4 containers.
 
 
+```mermaid
+flowchart TD
+
+    UserDev("Developer \n[Person]")
+    UserAdmin("Administrator\n[Person]")
+    class UserDev,UserAdmin User;
+    classDef User fill:#048,stroke-width:0px,color:#fff;
+
+    subgraph infra[ ]
+    Server["API Server\n[Go binary in a kubernetes pod]"]
+    Connector["Destination Connector\n[Go binary in a kubernetes pod]"]
+    CLI["Infra CLI\n[Go binary on a desktop]"\n]
+    UI["Infra Web UI\n[frontend in a web brower]"]
+    class Server,Connector,CLI,UI Container;
+    classDef Container fill:#05d,stroke-width:0px,color:#fff;
+    end
+    style infra fill:transparent,stroke:#333,stroke-width:1px,color:#fff,stroke-dasharray: 10 10;
+
+    AdminAutomation["Admin Automation\n[Software System]"]
+    IDP["Identity Provider (Okta)\n[Software System]"]
+    Destination["Destination (Kubernetes)\n[Software System]"]
+    Database[("Database (PostgreSQL)\n[Software System]")]
+    SecretsStore[("Secrets Store\n[Software System]")]
+    class IDP,Destination,AdminAutomation,Database,SecretsStore External;
+    classDef External fill:#777,stroke-width:0px,color:#fff;
+
+    UserDev-.->|login|CLI
+    UserAdmin-.->CLI
+    UserAdmin-.->UI
+    UserAdmin-.->AdminAutomation
+
+    AdminAutomation-.->Server
+    CLI-.->Server
+    UI-.->Server
+
+    Connector-.->|creates credentials|Destination
+    Connector-.->|query grants for identity|Server
+
+    Server-.->|query identity for user|IDP
+    Server-.->|query and store|Database
+    Server-.->|get or save secret|SecretsStore
+```
+
+### API Server
+
+```mermaid
+flowchart TD
+
+    CLI
+    UI
+    Connector
+    class CLI,UI,Connector Container;
+    classDef Container fill:#05d,stroke-width:0px,color:#fff;
+
+    subgraph server
+    API
+    Secrets
+    DataPersistence
+    OIDCClient[ODIC Client]
+
+    class API,Secrets,DataPersistence,OIDCClient Component;
+    classDef Component fill:#59d,stroke-width:0px,color:#fff;
+    end
+    style server fill:transparent,stroke:#333,stroke-width:1px,color:#fff,stroke-dasharray: 10 10;
+
+    AdminAutomation["Admin Automation\n[Software System]"]
+    IDP["Identity Provider (Okta)\n[Software System]"]
+    Database[("Database (PostgreSQL)\n[Software System]")]
+    SecretsStore[("Secrets Store\n[Software System]")]
+    class IDP,Destination,AdminAutomation,Database,SecretsStore External;
+    classDef External fill:#777,stroke-width:0px,color:#fff;
+
+    AdminAutomation-.->API
+    CLI-.->API
+    UI-.->API
+
+    API-.->Secrets
+    API-.->DataPersistence
+    API-.->OIDCClient
+
+    Connector-.->API
+    DataPersistence-.->Database
+    OIDCClient-.->IDP
+    Secrets-.->SecretsStore
+```
+
+### Destination Connector
+
+### Command Line Interface (CLI)
+
+### Web UI
