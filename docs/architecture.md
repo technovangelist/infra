@@ -96,7 +96,7 @@ flowchart TD
     class CLI,UI,Connector Container;
     classDef Container fill:#05d,stroke-width:0px,color:#fff;
 
-    subgraph server
+    subgraph server[ ]
     API
     Secrets
     DataPersistence
@@ -129,6 +129,45 @@ flowchart TD
 ```
 
 ### Destination Connector
+
+```mermaid
+flowchart TD
+
+    UserDev("Developer \n[Person]")
+    class UserDev,UserAdmin User;
+    classDef User fill:#048,stroke-width:0px,color:#fff;
+
+    APIServer[API Server]
+    class APIServer Container;
+    classDef Container fill:#05d,stroke-width:0px,color:#fff;
+
+    subgraph connector[ ]
+    KubernetesClient[Kubernetes Client]
+    Reconciler[\RoleBinding Reconciler/]
+    APIClient[API Client]
+    KubernetesAPIProxy[Kubernetes API Proxy]
+    JWKCache[JWK Cache]
+
+    class KubernetesClient,Reconciler,APIClient,TLSServer,KubernetesAPIProxy,JWKCache Component;
+    classDef Component fill:#59d,stroke-width:0px,color:#fff;
+    end
+    style connector fill:transparent,stroke:#333,stroke-width:1px,color:#fff,stroke-dasharray: 10 10;
+
+    Destination["Destination (Kubernetes)\n[Software System]"]
+    class Destination External;
+    classDef External fill:#777,stroke-width:0px,color:#fff;
+
+    APIClient-.->|query grants*|APIServer
+    Reconciler-.->KubernetesClient
+    KubernetesClient-.->|query and write roles and bindings|Destination
+    Reconciler-.->APIClient
+
+    UserDev-.->|kubernetes API request|KubernetesAPIProxy
+    KubernetesAPIProxy-.->|forward request with impersonation|Destination
+
+    KubernetesAPIProxy-.->JWKCache
+    JWKCache-.->|request public key|APIServer
+```
 
 ### Command Line Interface (CLI)
 
