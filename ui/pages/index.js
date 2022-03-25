@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
 import Nav from '../components/nav/Nav'
-import Navigation from '../components/nav/Navigation'
+import PageHeader from '../components/PageHeader'
 
 import AuthContext from '../store/AuthContext'
 
@@ -24,10 +24,9 @@ export default function Index () {
 
   return (
     <Container>
-      {/* <Navigation /> */}
       <Nav />
       <div>
-        {currentUser ? <p>{currentUser.name}</p> : <></>}
+        <PageHeader iconPath='/access.svg' title='Access' />
       </div>
     </Container>
   )
