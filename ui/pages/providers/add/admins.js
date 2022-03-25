@@ -33,11 +33,9 @@ const Admins = () => {
       email: adminEmail,
       provider_id: providerId
     }
-    console.log(params)
 
     await axios.get('/v1/users', { params })
       .then(async (response) => {
-        console.log('response:', response)
         if (response.data.length === 0) {
           await axios.post('/v1/users',
             { email: adminEmail, providerID: providerId })
