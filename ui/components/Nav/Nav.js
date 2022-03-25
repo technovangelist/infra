@@ -7,7 +7,7 @@ import UserDropdown from './UserDropdown'
 const NavContainer = styled.div`
   display: grid;
   grid-template-rows: auto 10%;
-  border-right: .1rem solid #838383;
+  border-right: .1rem solid rgba(178,178,178, .1);
   min-height: 100vh;
 `
 
@@ -97,7 +97,7 @@ const Nav = () => {
 
   return (
     <NavContainer>
-      <div>        
+      <div>
         <NavLogo><img src='/brand.svg' /></NavLogo>
         <NavContent>
           <div>
@@ -105,7 +105,7 @@ const Nav = () => {
             <NavTitlesGroup>
               <Link href='/'>
                 <NavItem selected={pathname === page.access}>
-                  <NavImg src='/access.svg'/>
+                  <NavImg src='/access.svg' />
                   <NavTitle>Access</NavTitle>
                 </NavItem>
               </Link>
@@ -116,13 +116,13 @@ const Nav = () => {
             <NavTitlesGroup>
               <Link href='/providers'>
                 <NavItem selected={pathname === page.providers}>
-                  <NavImg src='/identity-providers.svg'/>
+                  <NavImg src='/identity-providers.svg' />
                   <NavTitle>Identity Providers</NavTitle>
                 </NavItem>
               </Link>
               <Link href='/local-user'>
                 <NavItem selected={pathname === page.users}>
-                  <NavImg src='/local-users.svg'/>
+                  <NavImg src='/local-users.svg' />
                   <NavTitle>Identities</NavTitle>
                 </NavItem>
               </Link>

@@ -164,7 +164,7 @@ const UserDropdown = () => {
         <UserDropdownHeader>
           <span>{iconText}</span>
         </UserDropdownHeader>
-        { user && <UserNameText>{user.name}</UserNameText>}
+        {user && <UserNameText>{user.name}</UserNameText>}
       </UserDropdownButton>
       {dropdownOpen &&
         <UserDropdownContent>
