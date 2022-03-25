@@ -15,9 +15,17 @@ const UserDropdownButton = styled.button`
   cursor: pointer;
   opacity: .8;
   padding: 0;
+  padding-left: .5rem;
 
   &:hover {
+    display: flex;
     opacity: 1;
+    background: #20262C;
+    border-radius: 4px;
+    width: 95%;
+    height: 3rem;
+    padding-top: 0.75rem;
+
   }
 `
 
@@ -60,6 +68,7 @@ const UserDropdownContentHeader = styled.div`
   display: flex;
   flex-direction: column;
   padding-bottom: 1rem;
+  padding-left: 19px;
 
   & > *:not(:first-child) {
     padding-top: .5rem
@@ -88,6 +97,7 @@ const Content = styled.div`
 const LogoutContainer = styled.div`
   margin-left: -.45rem;
   margin-right: -.45rem;
+  padding-left: 19px;
 `
 
 const LogoutButton = styled.a`
@@ -103,6 +113,10 @@ const LogoutButton = styled.a`
 
   span {
     padding-left: 11px;
+  }
+
+  &:hover {
+    opacity: 1;
   }
 `
 

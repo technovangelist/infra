@@ -18,14 +18,13 @@ const NavLogo = styled.div`
 `
 
 const NavContent = styled.div`
-  padding-left: 21px;
-
   & > *:not(:first-child) {
     padding-top: 2rem;
   }
 `
 
 const NavSubTitle = styled.span`
+  padding-left: 21px;
   font-weight: 400;
   font-size: 10px;
   line-height: 0%;
@@ -35,7 +34,8 @@ const NavSubTitle = styled.span`
 
 const NavTitlesGroup = styled.div`
   & > * {
-    margin-top: 1rem;
+    margin-top: .5rem;
+    padding-top: 1rem;
   }
 `
 
@@ -43,14 +43,30 @@ const NavItem = styled.div`
   cursor: pointer;
 
   &:hover {
-    a {
-      color: #FFFFFF;
-    }
+    display: flex;
+    background: #20262C;
+    border-radius: 4px;
+    width: 95%;
+    height: 30px;
   }
 
   & > *:not(:first-child) {
     padding-left: .75rem;
-  }  
+  }
+  
+  ${props =>
+    props.selected && css`
+      a {
+        color: #FFFFFF;
+      }
+
+      opacity: 1;
+      display: flex;
+      background: #2F363D;
+      border-radius: 4px;
+      width: 95%;
+      height: 30px;
+  `}
 `
 
 const NavTitle = styled.a`
@@ -58,24 +74,18 @@ const NavTitle = styled.a`
   font-size: 12px;
   line-height: 15px;
   color: #B2B2B2;
-
-  ${props =>
-    props.selected && css`
-      opacity: 1;
-      color: #FFFFFF;
-  `}
 `
 
 const NavImg = styled.img`
   width: 1rem;
   height: 1rem;
   vertical-align: middle;
+  padding-left: 21px;
 `
 
 const NavFooter = styled.div`
   display: flex;
   flex-direction: column-reverse;
-  padding-left: 21px;
   padding-bottom: 20px;
 `
 
@@ -94,9 +104,9 @@ const Nav = () => {
             <NavSubTitle>Administration</NavSubTitle>
             <NavTitlesGroup>
               <Link href='/'>
-                <NavItem>
+                <NavItem selected={pathname === page.access}>
                   <NavImg src='/access.svg'/>
-                  <NavTitle selected={pathname === page.access}>Access</NavTitle>
+                  <NavTitle>Access</NavTitle>
                 </NavItem>
               </Link>
             </NavTitlesGroup>
@@ -105,15 +115,15 @@ const Nav = () => {
             <NavSubTitle>Identities</NavSubTitle>
             <NavTitlesGroup>
               <Link href='/providers'>
-                <NavItem>
+                <NavItem selected={pathname === page.providers}>
                   <NavImg src='/identity-providers.svg'/>
-                  <NavTitle selected={pathname === page.providers}>Identity Providers</NavTitle>
+                  <NavTitle>Identity Providers</NavTitle>
                 </NavItem>
               </Link>
               <Link href='/local-user'>
-                <NavItem>
+                <NavItem selected={pathname === page.users}>
                   <NavImg src='/local-users.svg'/>
-                  <NavTitle selected={pathname === page.users}>Identities</NavTitle>
+                  <NavTitle>Identities</NavTitle>
                 </NavItem>
               </Link>
             </NavTitlesGroup>
@@ -122,9 +132,9 @@ const Nav = () => {
             <NavSubTitle>Resources</NavSubTitle>
             <NavTitlesGroup>
               <Link href='/infrastructure'>
-                <NavItem>
+                <NavItem selected={pathname === page.infrastructure}>
                   <NavImg src='/infrastructure.svg' />
-                  <NavTitle selected={pathname === page.infrastructure}>Infrastructure</NavTitle>
+                  <NavTitle>Infrastructure</NavTitle>
                 </NavItem>
               </Link>
             </NavTitlesGroup>

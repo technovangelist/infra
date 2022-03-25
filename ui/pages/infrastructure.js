@@ -16,7 +16,6 @@ const Infrastructure = () => {
       <div>
         <PageHeader iconPath='/infrastructure.svg' title='Infrastructure' />
       </div>
-      <>this is infrastructure page</>
     </Container>
   )
 }
