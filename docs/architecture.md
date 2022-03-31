@@ -172,3 +172,29 @@ flowchart TD
 ### Command Line Interface (CLI)
 
 ### Web UI
+
+## Code
+
+### Grant Entities
+
+```mermaid
+erDiagram
+    Grant {
+        Identity Subject
+        string Privilege
+        string Resource
+    }
+
+    Identity ||--o| User: "one of"
+    Identity ||--o| Machine: "one of"
+    Identity ||--o| Group: "one of"
+    User }|--o{ Group: "member of"
+
+    IdentityProvider }|--|{ User: "authenticates"
+    IdentityProvider ||--|{ Group: "defines"
+
+    Destination ||--|{ Resource: "defines"
+    Grant ||--|| Resource: "identifies"
+
+    Identity ||--|{ Grant: "receives access from"
+```
