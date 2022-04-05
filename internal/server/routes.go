@@ -27,9 +27,9 @@ func (a *API) registerRoutes(router *gin.Engine, promRegistry prometheus.Registe
 		logging.Middleware(),
 		RequestTimeoutMiddleware(),
 		DatabaseMiddleware(a.server.db),
-	}
+	)
 
-	v1 := router.Group("/v1", middleware...)
+	v1 := router.Group("/v1")
 	authorized := v1.Group("/", AuthenticationMiddleware())
 
 	{
@@ -88,7 +88,7 @@ func (a *API) registerRoutes(router *gin.Engine, promRegistry prometheus.Registe
 	}
 
 	// pprof.Index does not work with a /v1 prefix
-	debug := router.Group("/debug/pprof", append(middleware, AuthenticationMiddleware())...)
+	debug := router.Group("/debug/pprof", AuthenticationMiddleware())
 	debug.GET("/*profile", pprofHandler)
 
 	// TODO: remove after a couple version.
