@@ -323,62 +323,51 @@ func (s *Server) healthHandler(c *gin.Context) {
 }
 
 func (s *Server) ui(router *gin.Engine) error {
-	if !s.options.EnableUI {
-		return nil
+	if s.options.EnableUI {
+		if s.options.UIProxyURL != "" {
+			remote, err := urlx.Parse(s.options.UIProxyURL)
+			if err != nil {
+				return err
+			}
+
+			proxy := httputil.NewSingleHostReverseProxy(remote)
+			proxy.Director = func(req *http.Request) {
+				req.Host = remote.Host
+				req.URL.Scheme = remote.Scheme
+				req.URL.Host = remote.Host
+			}
+
+			router.Use(func(c *gin.Context) {
+				proxy.ServeHTTP(c.Writer, c.Request)
+			})
+		} else {
+			assetFS := &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, AssetInfo: AssetInfo}
+			staticFS := &StaticFileSystem{base: assetFS}
+			router.Use(gzip.Gzip(gzip.DefaultCompression), static.Serve("/", staticFS))
+
+			// 404
+			router.NoRoute(func(c *gin.Context) {
+				if strings.HasPrefix(c.Request.URL.Path, "/v1") {
+					c.Status(404)
+					c.Writer.WriteHeaderNow()
+					return
+				}
+
+				c.Status(http.StatusNotFound)
+				buf, err := assetFS.Asset("404.html")
+				if err != nil {
+					logging.S.Error(err)
+				}
+
+				_, err = c.Writer.Write(buf)
+				if err != nil {
+					logging.S.Error(err)
+				}
+
+				c.Status(http.StatusNotFound)
+			})
+		}
 	}
-
-	router.Use(
-		logging.Middleware(),
-		RequestTimeoutMiddleware(),
-		metrics.Middleware(),
-	)
-
-	// Proxy requests to an upstream ui server
-	if s.options.UIProxyURL != "" {
-		remote, err := urlx.Parse(s.options.UIProxyURL)
-		if err != nil {
-			return err
-		}
-
-		proxy := httputil.NewSingleHostReverseProxy(remote)
-		proxy.Director = func(req *http.Request) {
-			req.Host = remote.Host
-			req.URL.Scheme = remote.Scheme
-			req.URL.Host = remote.Host
-		}
-
-		router.Use(func(c *gin.Context) {
-			proxy.ServeHTTP(c.Writer, c.Request)
-		})
-
-		return nil
-	}
-
-	assetFS := &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, AssetInfo: AssetInfo}
-	staticFS := &StaticFileSystem{base: assetFS}
-	router.Use(gzip.Gzip(gzip.DefaultCompression), static.Serve("/", staticFS))
-
-	// 404
-	router.NoRoute(func(c *gin.Context) {
-		if strings.HasPrefix(c.Request.URL.Path, "/v1") {
-			c.Status(404)
-			c.Writer.WriteHeaderNow()
-			return
-		}
-
-		c.Status(http.StatusNotFound)
-		buf, err := assetFS.Asset("404.html")
-		if err != nil {
-			logging.S.Error(err)
-		}
-
-		_, err = c.Writer.Write(buf)
-		if err != nil {
-			logging.S.Error(err)
-		}
-
-		c.Status(http.StatusNotFound)
-	})
 
 	return nil
 }
