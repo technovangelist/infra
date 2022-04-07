@@ -28,7 +28,10 @@ import (
 func setupServer(t *testing.T) *Server {
 	db := setupDB(t)
 
-	s := &Server{db: db}
+	s := &Server{
+		db:      db,
+		secrets: map[string]secrets.SecretStorage{},
+	}
 
 	err := s.setupInternalInfraIdentityProvider()
 	assert.NilError(t, err)
@@ -43,7 +46,7 @@ func setupServer(t *testing.T) *Server {
 		assert.NilError(t, err)
 	}
 
-	err = s.importSecrets()
+	err = importSecrets(nil, s.secrets)
 	assert.NilError(t, err)
 
 	return s
@@ -802,26 +805,36 @@ func TestLoadConfigUpdate(t *testing.T) {
 }
 
 func TestImportAccessKeys(t *testing.T) {
-	s := setupServer(t)
+	db := setupDB(t)
+
+	s := Server{db: db, secrets: map[string]secrets.SecretStorage{}}
 
 	s.options = Options{
 		AdminAccessKey: "BlgpvURSGF.NdcemBdzxLTGIcjPXwPoZNrb",
 		AccessKey:      "tuogTmCFSk.FzoWHhNonnRztyRChPUiMqDx",
 	}
 
-	err := s.importAccessKeys()
+	err := importSecrets(nil, s.secrets)
+	assert.NilError(t, err)
+
+	err = s.importAccessKeys()
 	assert.NilError(t, err)
 }
 
 func TestImportAccessKeysUpdate(t *testing.T) {
-	s := setupServer(t)
+	db := setupDB(t)
+
+	s := Server{db: db, secrets: map[string]secrets.SecretStorage{}}
 
 	s.options = Options{
 		AdminAccessKey: "BlgpvURSGF.NdcemBdzxLTGIcjPXwPoZNrb",
 		AccessKey:      "tuogTmCFSk.FzoWHhNonnRztyRChPUiMqDx",
 	}
 
-	err := s.importAccessKeys()
+	err := importSecrets(nil, s.secrets)
+	assert.NilError(t, err)
+
+	err = s.importAccessKeys()
 	assert.NilError(t, err)
 
 	s.options = Options{
