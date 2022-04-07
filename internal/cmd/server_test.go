@@ -9,6 +9,7 @@ import (
 	"gotest.tools/v3/fs"
 
 	"github.com/infrahq/infra/internal/server"
+	"github.com/infrahq/infra/secrets"
 )
 
 func TestParseOptions_WithServerOptions(t *testing.T) {
@@ -58,13 +59,42 @@ func TestParseOptions_WithServerOptions(t *testing.T) {
 				expected := serverOptionsWithDefaults()
 				expected.Secrets = []server.SecretProvider{
 					{
-						Kind: "env",
-						Name: "base64env",
-						Config: map[any]any{
-							"base64": true,
-						},
+						Kind:   "env",
+						Name:   "base64env",
+						Config: secrets.GenericConfig{Base64: true},
 					},
 				}
+				return expected
+			},
+		},
+		{
+			name: "config filename specified as env var",
+			setup: func(t *testing.T, cmd *cobra.Command) {
+				t.Skip("does not work yet")
+				content := `
+                    addr:
+                      http: "127.0.0.1:1455"`
+
+				dir := fs.NewDir(t, t.Name(),
+					fs.WithFile("cfg.yaml", content))
+
+				t.Setenv("INFRA_SERVER_CONFIG_FILE", dir.Join("cfg.yaml"))
+			},
+			expected: func(t *testing.T) server.Options {
+				expected := serverOptionsWithDefaults()
+				expected.Addr.HTTP = "127.0.0.1:1455"
+				return expected
+			},
+		},
+		{
+			name: "env var can set a value outside of the top level",
+			setup: func(t *testing.T, cmd *cobra.Command) {
+				t.Skip("does not work yet")
+				t.Setenv("INFRA_SERVER_ADDR_HTTP", "127.0.0.1:1455")
+			},
+			expected: func(t *testing.T) server.Options {
+				expected := serverOptionsWithDefaults()
+				expected.Addr.HTTP = "127.0.0.1:1455"
 				return expected
 			},
 		},
