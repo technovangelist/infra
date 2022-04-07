@@ -194,8 +194,8 @@ func buildProperty(f reflect.StructField, t, parent reflect.Type, parentSchema *
 	}
 
 	s := &openapi3.Schema{}
-	setTypeInfo(t, s)
 	setTagInfo(f, t, parent, s, parentSchema)
+	setTypeInfo(t, s)
 
 	if s.Type == "array" {
 		s.Items = buildProperty(f, t.Elem(), parent, parentSchema)
@@ -280,6 +280,23 @@ func setTagInfo(f reflect.StructField, t, parent reflect.Type, schema, parentSch
 				schema.MinLength = len
 			}
 
+			if strings.HasPrefix(val, "oneof=") {
+				oneof := strings.Split(val, "oneof=")
+				if len(oneof) != 2 {
+					panic("oneof tag does not match expected format")
+				}
+
+				values := strings.Split(oneof[1], " ")
+
+				// convert to a slice of interfaces to assign to the schema
+				enumInterface := make([]interface{}, len(values))
+				for i := range values {
+					enumInterface[i] = values[i]
+				}
+
+				schema.Enum = enumInterface
+			}
+
 			if val == "email" {
 				schema.Example = "email@example.com"
 			}
@@ -292,6 +309,7 @@ var exampleTime = time.Date(2022, 3, 14, 9, 48, 0, 0, time.UTC).Format(time.RFC3
 // `type` can be one of the following only: "object", "array", "string", "number", "integer", "boolean", "null".
 // `format` has a few defined types, but can be anything. https://swagger.io/docs/specification/data-models/data-types/
 func setTypeInfo(t reflect.Type, schema *openapi3.Schema) {
+	fmt.Println(schema)
 	switch structNameWithPkg(t) {
 	case "api.Time", "time.Time":
 		schema.Type = "string"
@@ -508,6 +526,23 @@ func buildRequest(r reflect.Type, op *openapi3.Operation) {
 						}
 
 						p.Schema.Value.MinLength = len
+					}
+
+					if strings.HasPrefix(val, "oneof=") {
+						oneof := strings.Split(val, "oneof=")
+						if len(oneof) != 2 {
+							panic("oneof tag does not match expected format")
+						}
+
+						values := strings.Split(oneof[1], " ")
+
+						// convert to a slice of interfaces to assign to the schema
+						enumInterface := make([]interface{}, len(values))
+						for i := range values {
+							enumInterface[i] = values[i]
+						}
+
+						p.Schema.Value.Enum = enumInterface
 					}
 
 					if val == "email" {

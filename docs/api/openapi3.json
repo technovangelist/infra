@@ -2039,6 +2039,10 @@
               "schema": {
                 "properties": {
                   "kind": {
+                    "enum": [
+                      "user",
+                      "machine"
+                    ],
                     "type": "string"
                   },
                   "name": {
