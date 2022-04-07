@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/infrahq/infra/internal"
+	"github.com/infrahq/infra/internal/decode"
 	"github.com/infrahq/infra/internal/logging"
 	"github.com/infrahq/infra/internal/server/data"
 	"github.com/infrahq/infra/internal/server/models"
@@ -123,6 +124,7 @@ func (s *Server) importSecretKeys() error {
 	return nil
 }
 
+// TODO: no longer works because mapstructure decodes
 func (sp *KeyProvider) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	tmp := &simpleConfigSecretProvider{}
 
@@ -166,11 +168,12 @@ func (sp *KeyProvider) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type SecretProvider struct {
-	Kind   string      `yaml:"kind" validate:"required"`
-	Name   string      `yaml:"name"` // optional
+	Kind   string      `mapstructure:"kind" validate:"required"`
+	Name   string      `mapstructure:"name"` // optional
 	Config interface{} // contains secret-provider-specific config
 }
 
+// TODO: Remove
 type simpleConfigSecretProvider struct {
 	Kind string `yaml:"kind"`
 	Name string `yaml:"name"`
@@ -372,80 +375,84 @@ func loadDefaultSecretConfig(storage map[string]secrets.SecretStorage) error {
 	return nil
 }
 
-func (sp *SecretProvider) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	tmp := &simpleConfigSecretProvider{}
-
-	if err := unmarshal(&tmp); err != nil {
-		return fmt.Errorf("unmarshalling secret provider: %w", err)
+// TODO: tests for missing name and kind
+func (sp *SecretProvider) UnmarshalMap(data map[interface{}]interface{}, decode decode.Decoder) error {
+	var ok bool
+	sp.Name, ok = data["name"].(string)
+	if !ok {
+		return fmt.Errorf("secret provider missing name")
+	}
+	sp.Kind, ok = data["kind"].(string)
+	if !ok {
+		return fmt.Errorf("secret provider %v missing kind", sp.Name)
 	}
 
-	sp.Kind = tmp.Kind
-	sp.Name = tmp.Name
+	cfg := data["config"]
 
-	switch tmp.Kind {
+	switch sp.Kind {
 	case "vault":
 		p := secrets.NewVaultConfig()
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	case "awsssm":
 		p := secrets.AWSSSMConfig{}
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
-		if err := unmarshal(&p.AWSConfig); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p.AWSConfig, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	case "awssecretsmanager":
 		p := secrets.AWSSecretsManagerConfig{}
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
-		if err := unmarshal(&p.AWSConfig); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p.AWSConfig, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	case "kubernetes":
 		p := secrets.NewKubernetesConfig()
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	case "env":
 		p := secrets.GenericConfig{}
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	case "file":
 		p := secrets.FileConfig{}
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
-		if err := unmarshal(&p.GenericConfig); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p.GenericConfig, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	case "plaintext", "":
 		p := secrets.GenericConfig{}
-		if err := unmarshal(&p); err != nil {
-			return fmt.Errorf("unmarshal yaml: %w", err)
+		if err := decode(&p, cfg); err != nil {
+			return err
 		}
 
 		sp.Config = p
 	default:
-		return fmt.Errorf("unknown secret provider type %q, expected one of %q", tmp.Kind, secrets.SecretStorageProviderKinds)
+		return fmt.Errorf("unknown secret provider type %q, expected one of %q", sp.Kind, secrets.SecretStorageProviderKinds)
 	}
 
 	return nil
