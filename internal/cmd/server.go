@@ -53,7 +53,7 @@ func newServerCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return srv.Run(context.Background())
+			return runServer(context.Background(), srv)
 		},
 	}
 
@@ -88,4 +88,9 @@ func defaultServerOptions() server.Options {
 			Metrics: ":9090",
 		},
 	}
+}
+
+// shim for testing
+var runServer = func(ctx context.Context, srv *server.Server) error {
+	return srv.Run(ctx)
 }
