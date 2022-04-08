@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"time"
 
 	"github.com/iancoleman/strcase"
@@ -53,7 +52,7 @@ func newServerCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return srv.Run(context.Background())
+			return srv.Run(cmd.Context())
 		},
 	}
 
