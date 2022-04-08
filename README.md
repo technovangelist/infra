@@ -132,13 +132,13 @@ This creates a one-time password for the created user.
 ### 6. Grant Infra administrator privileges to the first user
 
 ``` 
-infra grants add --user name@example.com --role admin infra 
+infra grants add name@example.com infra --role admin
 ``` 
 
 ### 7. Grant Kubernetes cluster administrator privileges to the first user 
 
 ```
-infra grants add --user name@example.com --role cluster-admin kubernetes.example-name
+infra grants add name@example.com kubernetes.example-name --role cluster-admin
 ```
 
 <details>
@@ -195,14 +195,11 @@ See the cluster(s) connected to Infra:
 ```
 infra destinations list
 ```
-See who has access to what via Infra: 
+See who has access to what via Infra (requires admin or view role on Infra) 
 ```
 infra grants list
 
-Note: this requires the user to have either admin or view permissions to Infra. 
-
-An example to grant the permission:
-infra grants add --user name@example.com --role view infra 
+To grant user access to this command, run 'infra grants add name@example infra --role view'
 ```
 </details>
 

@@ -193,33 +193,36 @@ infra grants list [DESTINATION] [flags]
 
 Grant access to a destination
 
+### Synopsis
+
+Grant one or more identities access to a destination. 
+
+IDENTITY is one that is being given access.
+DESTINATION is what the identity will gain access to. 
+
+Use [--role] if further fine grained permissions are needed. If not specified, user will gain the permission 'connect' to the destination. 
+$ infra grants add ... -role admin ...
+
+Use [--group] or [-g] if identity is of type group. 
+$ infra grants add devGroup -group ...
+$ infra grants add devGroup -g ...
+
+Use [--provider] if more than one identity providers are connected. 
+$ infra grants add johndoe@acme.com --provider oktaDev ...
+
+For full documentation on grants, see  https://github.com/infrahq/infra/blob/main/docs/using-infra/grants.md 
+
+
 ```
-infra grants add DESTINATION [flags]
-```
-
-### Examples
-
-```
-
-# Grant user admin access to a cluster
-$ infra grants add -u suzie@acme.com -r admin kubernetes.production
-
-# Grant group admin access to a namespace
-$ infra grants add -g Engineering -r admin kubernetes.production.default
-
-# Grant user admin access to infra itself
-$ infra grants add -u admin@acme.com -r admin infra
-
+infra grants add IDENTITY DESTINATION [flags]
 ```
 
 ### Options
 
 ```
-  -g, --group string      Group to grant access to
-  -m, --machine string    Machine to grant access to
-  -p, --provider string   Provider from which to grant user access to
-  -r, --role string       Role to grant
-  -u, --user string       User to grant access to
+  -g, --group             Marks identity as type 'group'
+      --provider string   Name of identity provider
+      --role string       Type of access that identity will be given (default "connect")
 ```
 
 ### Options inherited from parent commands
@@ -370,16 +373,16 @@ infra keys add ACCESS_KEY_NAME MACHINE_NAME [flags]
 
 ```
 
-# Create an access key for the machine "wall-e" called main that expires in 12 hours and must be used every hour to remain valid
-infra keys create main wall-e 12h --extension-deadline=1h
+# Create an access key for the machine "bot" called "first-key" that expires in 12 hours and must be used every hour to remain valid
+infra keys add first-key bot --ttl=12h --extension-deadline=1h
 
 ```
 
 ### Options
 
 ```
-      --extension-deadline string   A specified deadline that an access key must be used within to remain valid, defaults to 1h
-      --ttl string                  The total time that an access key will be valid for, defaults to 24h
+      --extension-deadline string   A specified deadline that an access key must be used within to remain valid, defaults to 30 days
+      --ttl string                  The total time that an access key will be valid for, defaults to 30 days
 ```
 
 ### Options inherited from parent commands
@@ -431,14 +434,19 @@ Connect an identity provider
 
 Add an identity provider for users to authenticate.
 
-NAME: The name of the identity provider (e.g. okta)
-URL: The base URL of the domain used to login with the identity provider (e.g. acme.okta.com)
-CLIENT_ID: The Infra application OpenID Connect client ID
-CLIENT_SECRET: The Infra application OpenID Connect client secret
+PROVIDER is a short unique name of the identity provider bieng added (eg. okta) 
 		
 
 ```
-infra providers add NAME URL CLIENT_ID CLIENT_SECRET [flags]
+infra providers add PROVIDER [flags]
+```
+
+### Options
+
+```
+      --client-id string       OIDC client ID
+      --client-secret string   OIDC client secret
+      --url string             Base URL of the domain of the OIDC identity provider (eg. acme.okta.com)
 ```
 
 ### Options inherited from parent commands
