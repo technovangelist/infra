@@ -101,7 +101,7 @@ func addGrant(cmdOptions grantsCmdOptionsNew) error {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("New inactive identity %q added to Infra\n", cmdOptions.Identity)
+			fmt.Printf("New unlinked identity %q added to Infra\n", cmdOptions.Identity)
 
 			id = uid.NewIdentityPolymorphicID(created.ID)
 		case 1:
