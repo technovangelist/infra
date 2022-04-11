@@ -168,15 +168,15 @@ func (sp *KeyProvider) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 type SecretProvider struct {
-	Kind   string      `mapstructure:"kind" validate:"required"`
-	Name   string      `mapstructure:"name"` // optional
+	Kind   string      `mapstructure:"kind"`
+	Name   string      `mapstructure:"name"`
 	Config interface{} // contains secret-provider-specific config
 }
 
 // TODO: Remove
 type simpleConfigSecretProvider struct {
-	Kind string `yaml:"kind"`
-	Name string `yaml:"name"`
+	Kind string `mapstructure:"kind"`
+	Name string `mapstructure:"name"`
 }
 
 var baseSecretStorageKinds = []string{
@@ -375,19 +375,12 @@ func loadDefaultSecretConfig(storage map[string]secrets.SecretStorage) error {
 	return nil
 }
 
-// TODO: tests for missing name and kind
 func (sp *SecretProvider) UnmarshalMap(data map[interface{}]interface{}, decode decode.Decoder) error {
-	var ok bool
-	sp.Name, ok = data["name"].(string)
-	if !ok {
-		return fmt.Errorf("secret provider missing name")
+	type Alias SecretProvider // use an alias to prevent recursive calls to UnmarshalMap
+	if err := decode((*Alias)(sp), data); err != nil {
+		return fmt.Errorf("bad config for secret provider: %w", err)
 	}
-	sp.Kind, ok = data["kind"].(string)
-	if !ok {
-		return fmt.Errorf("secret provider %v missing kind", sp.Name)
-	}
-
-	cfg := data["config"]
+	cfg := sp.Config
 
 	switch sp.Kind {
 	case "vault":
@@ -403,18 +396,10 @@ func (sp *SecretProvider) UnmarshalMap(data map[interface{}]interface{}, decode 
 			return err
 		}
 
-		if err := decode(&p.AWSConfig, cfg); err != nil {
-			return err
-		}
-
 		sp.Config = p
 	case "awssecretsmanager":
 		p := secrets.AWSSecretsManagerConfig{}
 		if err := decode(&p, cfg); err != nil {
-			return err
-		}
-
-		if err := decode(&p.AWSConfig, cfg); err != nil {
 			return err
 		}
 
@@ -439,12 +424,9 @@ func (sp *SecretProvider) UnmarshalMap(data map[interface{}]interface{}, decode 
 			return err
 		}
 
-		if err := decode(&p.GenericConfig, cfg); err != nil {
-			return err
-		}
-
 		sp.Config = p
 	case "plaintext", "":
+		sp.Kind = "plaintext"
 		p := secrets.GenericConfig{}
 		if err := decode(&p, cfg); err != nil {
 			return err
@@ -452,7 +434,8 @@ func (sp *SecretProvider) UnmarshalMap(data map[interface{}]interface{}, decode 
 
 		sp.Config = p
 	default:
-		return fmt.Errorf("unknown secret provider type %q, expected one of %q", sp.Kind, secrets.SecretStorageProviderKinds)
+		return fmt.Errorf("unknown secret provider kind %q, expected one of %v",
+			sp.Kind, strings.Join(secrets.SecretStorageProviderKinds, ", "))
 	}
 
 	return nil

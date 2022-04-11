@@ -22,7 +22,7 @@ type AWSSecretsManager struct {
 }
 
 type AWSSecretsManagerConfig struct {
-	AWSConfig
+	AWSConfig `mapstructure:",squash"`
 
 	UseSecretMaps bool `mapstructure:"useSecretMaps"` // TODO: support storing to json maps if this is enabled.
 }

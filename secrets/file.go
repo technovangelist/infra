@@ -17,8 +17,8 @@ type GenericConfig struct {
 }
 
 type FileConfig struct {
-	GenericConfig
-	Path string `mapstructure:"path" validate:"required"`
+	GenericConfig `mapstructure:",squash"`
+	Path          string `mapstructure:"path" validate:"required"`
 }
 
 type FileSecretProvider struct {
