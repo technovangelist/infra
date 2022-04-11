@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/infrahq/infra/api"
+	"github.com/infrahq/infra/internal/server/models"
 )
 
 func newProvidersCmd() *cobra.Command {
@@ -151,6 +152,15 @@ func newProvidersRemoveCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+func GetInfraProvider() (*api.Provider, error) {
+	client, err := defaultAPIClient()
+	if err != nil {
+		return nil, err
+	}
+
+	return GetProviderByName(client, models.InternalInfraProviderName)
 }
 
 func GetProviderByName(client *api.Client, name string) (*api.Provider, error) {

@@ -265,7 +265,7 @@ func updateInfraConfig(client *api.Client, loginReq *api.LoginRequest, loginRes 
 		clientHostConfig.ProviderID = loginReq.OIDC.ProviderID
 	} else {
 		// TODO 1380: this is temporary - infra providerID should be saved somewhere else, and not here (https://github.com/infrahq/infra/issues/1380)
-		p, err := GetProviderByName(client, models.InternalInfraProviderName)
+		p, err := GetInfraProvider()
 		if err != nil {
 			return err
 		}

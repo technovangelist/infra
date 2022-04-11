@@ -77,7 +77,13 @@ func addGrant(cmdOptions grantsCmdOptionsNew) error {
 
 		switch len(groups) {
 		case 0:
-			return fmt.Errorf("No group of name %s exists", cmdOptions.Identity)
+			created, err := client.CreateGroup(&api.CreateGroupRequest{Name: cmdOptions.Identity})
+			if err != nil {
+				return err
+			}
+			fmt.Printf("New group %q added to Infra\n", cmdOptions.Identity)
+
+			id = uid.NewGroupPolymorphicID(created.ID)
 		case 1:
 			id = uid.NewGroupPolymorphicID(groups[0].ID)
 		case 2:
@@ -91,7 +97,13 @@ func addGrant(cmdOptions grantsCmdOptionsNew) error {
 
 		switch len(identities) {
 		case 0:
-			return fmt.Errorf("No identity of name %s exists", cmdOptions.Identity)
+			created, err := CreateIdentity(cmdOptions.Identity)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("New inactive identity %q added to Infra\n", cmdOptions.Identity)
+
+			id = uid.NewIdentityPolymorphicID(created.ID)
 		case 1:
 			id = uid.NewIdentityPolymorphicID(identities[0].ID)
 		case 2:
