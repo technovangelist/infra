@@ -342,6 +342,7 @@ func NewRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().Bool("help", false, "Display help")
 
 	rootCmd.SetHelpCommandGroup("Other commands:")
+	rootCmd.AddCommand(newAboutCmd())
 	rootCmd.SetUsageTemplate(usageTemplate())
 	return rootCmd
 }
