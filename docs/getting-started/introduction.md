@@ -35,8 +35,8 @@ $ infra list
 
 # Switching to a Kubernetes cluster and
 # running commands as usual "just works"
-$ infra use kubernetes.production.web
-Switched to context "infra:production:web".
+$ infra use production.web
+Switched to context "production.web".
 
 $ kubectl get pods
 NAME                  READY   STATUS    RESTARTS   AGE
